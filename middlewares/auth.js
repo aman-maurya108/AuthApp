@@ -5,8 +5,14 @@
 
  exports.auth = (req,res,next) =>{
     try{
-        // extract jwt token
-        const token = req.body.token;
+        // different ways to fetch token
+        //console.log("cookie",req.cookies.token); //only if cookie is created
+        //console.log("body",req.body.token);   // not so secure
+        //console.log("header",req.header("Authorization")); // most preferable way
+
+        
+        const token =  req.header("Authorization").replace("Bearer ","") || req.body.token || req.cookies.token ;
+
         if(!token){
             return res.status(400).json({
                 success : false,
@@ -17,11 +23,13 @@
         try{
             const payload = jwt.verify(token,process.env.JWT_SECRET);
             console.log(payload);
-
+            
             req.user = payload;
+            
         }
+
         catch(error){
-            return res.status(401).json({
+            return res.status(401).json({  
                 success : false,
                 message : 'INVALID Token.',
          });
